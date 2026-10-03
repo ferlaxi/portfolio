@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    </head>
+<body>
+<script>
+  console.log(typeof Swup);
+  console.log(typeof SwupFadeTheme);
+</script>
+
+<style>
+  #swup {
+    transition: opacity 0.3s ease-in-out;
+  }
+  #swup.fade-out {
+    opacity: 0;
+  }
+  #swup.fade-in {
+    opacity: 1;
+  }
+</style>
+<script>
+  document.addEventListener('click', async (e) => {
+    const a = e.target.closest('a');
+    if (!a || !a.href || a.target === '_blank' || a.hasAttribute('download')) return;
+    
+    const url = new URL(a.href);
+    if (url.origin !== window.location.origin) return;
+    
+    // Ignore hash links on same page
+    if (url.pathname === window.location.pathname && url.hash) return;
+
+    e.preventDefault();
+    if (url.href === window.location.href) return;
+
+    const main = document.getElementById('swup');
+    main.classList.add('fade-out');
+    
+    try {
+      const response = await fetch(url.href);
+      if (!response.ok) throw new Error('Network error');
+      
+      const htmlText = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, 'text/html');
+      
+      const newMain = doc.getElementById('swup');
+      if (newMain) {
+        setTimeout(() => {
+          main.innerHTML = newMain.innerHTML;
+          window.history.pushState({}, '', url.href);
+          document.title = doc.title;
+          
+          // Re-attach active classes to nav
+          document.querySelectorAll('.part').forEach(link => {
+             const linkUrl = new URL(link.href, window.location.origin);
+             if(linkUrl.pathname === url.pathname) {
+                 link.classList.add('on');
+             } else {
+                 link.classList.remove('on');
+             }
+          });
+          
+          window.scrollTo(0,0);
+          main.classList.remove('fade-out');
+        }, 300);
+      } else {
+        window.location.href = url.href;
+      }
+    } catch (err) {
+      window.location.href = url.href;
+    }
+  });
+
+  window.addEventListener('popstate', () => {
+     window.location.reload();
+  });
+</script>
+</body>
+
+</html>
