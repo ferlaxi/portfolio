@@ -1,0 +1,11 @@
+# Everything here is meant to be found.
+User-agent: *
+Allow: /
+
+# The build emits this next to index.html as the client-side-render
+# fallback. It is the same site with an empty <app-root> and no canonical,
+# so if it were ever crawled it would read as a blank duplicate of the
+# index. Nothing links to it; this makes that explicit.
+Disallow: /index.csr.html
+
+Sitemap: https://abdulmateenzwl.com/sitemap.xml
